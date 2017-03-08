@@ -33,7 +33,7 @@ import traceback
 from PyQt5.QtCore import (QCommandLineOption, QCommandLineParser, QDir, QFile, QFileInfo, QStandardPaths, Qt,
                           QTextStream)
 from PyQt5.QtGui import QCloseEvent, QContextMenuEvent, QDragEnterEvent, QDropEvent, QMouseEvent, QPixmap
-from PyQt5.QtWidgets import qApp, QApplication, QLabel, QMainWindow, QMessageBox
+from PyQt5.QtWidgets import qApp, QApplication, QLabel, QMainWindow, QMessageBox, QDockWidget, QListWidget
 
 from vidcutter.videocutter import VideoCutter
 
@@ -48,6 +48,7 @@ class MainWindow(QMainWindow):
         self.parse_cmdline()
         self.init_logger()
         self.init_cutter()
+        self.init_docks()
         self.setWindowTitle('%s' % qApp.applicationName())
         self.setContentsMargins(0, 0, 0, 0)
         self.statusBar().showMessage('Ready')
@@ -140,6 +141,14 @@ class MainWindow(QMainWindow):
         self.cutter = VideoCutter(self)
         qApp.setWindowIcon(self.cutter.appIcon)
         self.setCentralWidget(self.cutter)
+
+    def init_docks(self) -> None:
+        self.sourceDock = QDockWidget('Media Source', self)
+        self.sourceDock.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+        self.sourceDock.setFeatures(QDockWidget.DockWidgetMovable | QDockWidget.DockWidgetFloatable)
+        self.sourceList = QListWidget(self.sourceDock)
+        self.sourceDock.setWidget(self.sourceList)
+        self.addDockWidget(Qt.LeftDockWidgetArea, self.sourceDock)
 
     @staticmethod
     def get_bitness() -> int:
