@@ -35,7 +35,8 @@ from PyQt5.QtGui import (QCloseEvent, QDesktopServices, QFont, QFontDatabase, QI
                          QPixmap, QWheelEvent)
 from PyQt5.QtWidgets import (QAbstractItemView, QAction, qApp, QDialogButtonBox, QFileDialog, QGroupBox,
                              QHBoxLayout, QLabel, QListWidgetItem, QMenu, QMessageBox, QProgressDialog, QPushButton,
-                             QSizePolicy, QSlider, QStyleFactory, QTextBrowser, QVBoxLayout, QWidget)
+                             QSizePolicy, QSlider, QSplitter, QStyleFactory, QTextBrowser, QVBoxLayout, QWidget,
+                             QListWidget)
 
 import vidcutter.mpv as mpv
 import vidcutter.resources
@@ -92,6 +93,7 @@ class VideoCutter(QWidget):
         self.notifyInterval = 1000
         self.currentMedia = ''
         self.mediaAvailable = False
+        self.oldSplitterPos = 0
 
         self.edl = ''
         self.edlblock_re = re.compile(r'(\d+(?:\.?\d+)?)\s(\d+(?:\.?\d+)?)\s([01])')
@@ -113,28 +115,42 @@ class VideoCutter(QWidget):
 
         self.initNoVideo()
 
+        self.medialist = QListWidget(self, objectName='medialist')
+        self.medialist.setMinimumWidth(150)
+        self.medialist.setAttribute(Qt.WA_MacShowFocusRect, False)
+
+        # medialistHeader = QLabel(pixmap=QPixmap(':/images/mediafiles.png', 'PNG'), alignment=Qt.AlignCenter)
+        # medialistHeader.setObjectName('medialistHeader')
+
+        # self.medialistLayout = QVBoxLayout(spacing=0)
+        # self.medialistLayout.setContentsMargins(0, 0, 0, 0)
+        # # self.medialistLayout.addWidget(medialistHeader)
+        # self.medialistLayout.addWidget(self.medialist)
+
+        # self.medialistWidget = QWidget(self)
+        # self.medialistWidget.setLayout(self.medialistLayout)
+
         self.cliplist = VideoList(sizePolicy=QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Expanding),
                                   contextMenuPolicy=Qt.CustomContextMenu, uniformItemSizes=True,
                                   dragEnabled=True, dragDropMode=QAbstractItemView.InternalMove,
                                   alternatingRowColors=True, customContextMenuRequested=self.itemMenu,
                                   objectName='cliplist')
         self.cliplist.setItemDelegate(VideoItem(self.cliplist))
-        self.cliplist.setContentsMargins(0, 0, 0, 0)
         self.cliplist.setFixedWidth(190)
         self.cliplist.setAttribute(Qt.WA_MacShowFocusRect, False)
         self.cliplist.model().rowsMoved.connect(self.syncClipList)
 
         self.cliplist.setStyleSheet('QListView::item { border: none; }')
 
-        listHeader = QLabel(pixmap=QPixmap(':/images/clipindex.png', 'PNG'), alignment=Qt.AlignCenter)
-        listHeader.setObjectName('listHeader')
+        cliplistHeader = QLabel(pixmap=QPixmap(':/images/clipindex.png', 'PNG'), alignment=Qt.AlignCenter)
+        cliplistHeader.setObjectName('cliplistHeader')
 
         self.runtimeLabel = QLabel('<div align="right">00:00:00</div>', textFormat=Qt.RichText)
         self.runtimeLabel.setObjectName('runtimeLabel')
 
         self.clipindexLayout = QVBoxLayout(spacing=0)
         self.clipindexLayout.setContentsMargins(0, 0, 0, 0)
-        self.clipindexLayout.addWidget(listHeader)
+        self.clipindexLayout.addWidget(cliplistHeader)
         self.clipindexLayout.addWidget(self.cliplist)
         self.clipindexLayout.addWidget(self.runtimeLabel)
 
@@ -142,6 +158,16 @@ class VideoCutter(QWidget):
         self.videoLayout.setContentsMargins(0, 0, 0, 0)
         self.videoLayout.addWidget(self.novideoWidget)
         self.videoLayout.addLayout(self.clipindexLayout)
+
+        self.videoLayoutWidget = QWidget(self)
+        self.videoLayoutWidget.setLayout(self.videoLayout)
+
+        self.medialistSplitter = QSplitter(self, objectName='mediasplitter')
+        self.medialistSplitter.setHandleWidth(15)
+        self.medialistSplitter.addWidget(self.medialist)
+        self.medialistSplitter.addWidget(self.videoLayoutWidget)
+        self.medialistSplitter.setCollapsible(1, False)
+        self.medialistSplitter.setSizes([0, 1])
 
         self.timeCounter = QLabel('00:00:00 / 00:00:00', autoFillBackground=True, alignment=Qt.AlignCenter,
                                   sizePolicy=QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred))
@@ -211,7 +237,7 @@ class VideoCutter(QWidget):
 
         layout = QVBoxLayout()
         layout.setContentsMargins(10, 10, 10, 4)
-        layout.addLayout(self.videoLayout)
+        layout.addWidget(self.medialistSplitter)
         layout.addWidget(self.seekSlider)
         layout.addSpacing(2)
         layout.addLayout(controlsLayout)
@@ -443,7 +469,11 @@ class VideoCutter(QWidget):
         filename, _ = QFileDialog.getOpenFileName(self.parent, caption='Select media file',
                                                   directory=QDir.homePath())
         if filename != '':
+            self.addToMediaList(filename)
             self.loadMedia(filename)
+
+    def addToMediaList(self, filename: str) -> None:
+        pass
 
     def openEDL(self, checked: bool = False, edlfile: str = '') -> None:
         source_file, _ = os.path.splitext(self.currentMedia)

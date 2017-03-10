@@ -32,6 +32,25 @@ QWidget#novideoWidget {
 
 /* -------------------------------------------------------------------------- */
 
+QSplitter::handle#mediasplitter {
+    background-image: url(:/images/mediafiles-vertical-on.png);
+    background-color: #642C68;
+    background-repeat: no-repeat;
+    background-position: center center;
+    margin-right: 5px;
+    border: 1px solid #B9B9B9;
+    min-width: 15px;
+    max-width: 15px;
+}
+
+QSplitter::handle:pressed#mediasplitter {
+    background-image: url(:/images/mediafiles-vertical.png);
+    background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
+        stop: 0 #FFF, stop: 0.5 #EAEAEA, stop: 0.6 #EAEAEA, stop: 1 #FFF);
+}
+
+/* -------------------------------------------------------------------------- */
+
 QToolBar#appcontrols { spacing: 15px; }
 
 QToolBar#appcontrols QToolButton {
@@ -52,14 +71,14 @@ QToolBar#appcontrols QToolButton:pressed {
     color: #444;
 }
 
-QToolBar#appcontrols QToolButton:disabled, QToolBar#appcontrols QToolButton:disabled#saveButton { color: #AAA; }
-
 QToolBar#appcontrols QToolButton#saveButton { color:#642C68; }
-QToolBar#appcontrols QToolButton:disabled#saveButton { color:#AAA; }
+
+QToolBar#appcontrols QToolButton:disabled,
+QToolBar#appcontrols QToolButton:disabled#saveButton { color: #AAA; }
 
 /* -------------------------------------------------------------------------- */
 
-QListView#cliplist {
+QListView#medialist, QListView#cliplist {
     border-radius: 0;
     border: none;
     border-left: 1px solid #B9B9B9;
@@ -68,11 +87,17 @@ QListView#cliplist {
     background-color: #FFF;
 }
 
+QListView#medialist {
+    border-right: none;
+    border-top: 1px solid #B9B9B9;
+    border-bottom: 1px solid #B9B9B9;
+}
+
 QListView::item#cliplist { padding: 10px; }
 
 /* -------------------------------------------------------------------------- */
 
-QLabel#listHeader {
+QLabel#medialistHeader, QLabel#cliplistHeader {
     padding: 8px 5px 5px;
     border: 1px solid #B9B9B9;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,

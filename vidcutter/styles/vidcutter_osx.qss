@@ -59,20 +59,24 @@ QToolBar#appcontrols QToolButton:disabled#saveButton { color:#AAA; }
 
 /* -------------------------------------------------------------------------- */
 
-QListView#cliplist {
+QListView#filelist, QListView#cliplist {
     border-radius: 0;
+    border: 1px solid #B9B9B9;
+    show-decoration-selected: 1;
+    background-color: #FFF;
+}
+
+QListView#cliplist {
     border: none;
     border-left: 1px solid #B9B9B9;
     border-right: 1px solid #B9B9B9;
-    show-decoration-selected: 1;
-    background-color: #FFF;
 }
 
 QListView::item#cliplist { padding: 10px; }
 
 /* -------------------------------------------------------------------------- */
 
-QLabel#listHeader {
+QLabel#cliplistHeader {
     padding: 8px 5px 5px;
     border: 1px solid #B9B9B9;
     background-color: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1,
